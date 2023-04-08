@@ -21,12 +21,11 @@ sys.path.insert(1, os.path.join(os.path.dirname(__file__), '/opt/victronenergy/d
 from vedbus import VeDbusService
 
 
-class DbusShelly1pmService:
-  def __init__(self, servicename, paths, productname='Shelly(Plus) 1PM', connection='Shelly(Plus) 1PM HTTP JSON service'):
+class DbusTasmotaService:
+  def __init__(self, servicename, paths, productname='Tasmota', connection='Tasmota HTTP JSON service'):
     config = self._getConfig()
     deviceinstance = int(config['DEFAULT']['Deviceinstance'])
     customname = config['DEFAULT']['CustomName']
-    plusPmSupport = config['DEFAULT']['PlusPmSupport']
 
     self._dbusservice = VeDbusService("{}.http_{:02d}".format(servicename, deviceinstance))
     self._paths = paths
@@ -50,7 +49,7 @@ class DbusShelly1pmService:
     self._dbusservice.add_path('/FirmwareVersion', 0.1)
     self._dbusservice.add_path('/HardwareVersion', 0)
     self._dbusservice.add_path('/Position', 0) # normaly only needed for pvinverter
-    self._dbusservice.add_path('/Serial', self._getShellySerial())
+    self._dbusservice.add_path('/Serial', self._getTasmotaSerial())
     self._dbusservice.add_path('/UpdateIndex', 0)
     self._dbusservice.add_path('/StatusCode', 0)  # Dummy path so VRM detects us as a PV-inverter.
     
@@ -68,20 +67,9 @@ class DbusShelly1pmService:
     # add _signOfLife 'timer' to get feedback in log every 5minutes
     gobject.timeout_add(self._getSignOfLifeInterval()*60*1000, self._signOfLife)
  
-  def _getShellySerial(self):
-    config = self._getConfig()                                                                                                          
-    accessType = config['DEFAULT']['AccessType']                                                                                        
-    plusPmSupport = config['DEFAULT']['PlusPmSupport']  
-    meter_data = self._getShellyData()  
-    
-#    if not meter_data['mac'] and not meter_data['sys']['mac']:
-    if not meter_data['sys']['mac']:
-        raise ValueError("Response does not contain 'mac' attribute")
-    
-    if plusPmSupport == 'True':
-        serial = meter_data['sys']['mac']
-    else:
-        serial = meter_data['mac']
+  def _getTasmotaSerial(self):
+    config = self._getConfig()                                                                                                                                                                                               
+    serial = config['DEFAULT']['Serial']
     return serial
  
  
@@ -101,16 +89,12 @@ class DbusShelly1pmService:
     return int(value)
   
   
-  def _getShellyStatusUrl(self):
+  def _getTasmotaStatusUrl(self):
     config = self._getConfig()
     accessType = config['DEFAULT']['AccessType']
-    plusPmSupport = config['DEFAULT']['PlusPmSupport']
 
-    if accessType == 'OnPremise' and plusPmSupport == 'True':
-        URL = "http://%s/rpc/Shelly.GetStatus" % (config['ONPREMISE']['Host'])
-        URL = URL.replace(":@", "")
-    elif accessType == 'OnPremise':
-        URL = "http://%s:%s@%s/status" % (config['ONPREMISE']['Username'], config['ONPREMISE']['Password'], config['ONPREMISE']['Host'])
+    if accessType == 'OnPremise':
+        URL = "http://%s:%s@%s/cm?cmnd=status%208" % (config['ONPREMISE']['Username'], config['ONPREMISE']['Password'], config['ONPREMISE']['Host'])
         URL = URL.replace(":@", "")
     else:
         raise ValueError("AccessType %s is not supported" % (config['DEFAULT']['AccessType']))
@@ -118,28 +102,26 @@ class DbusShelly1pmService:
     return URL
     
  
-  def _getShellyData(self):
-    config = self._getConfig()                                                                                                                        
-    plusPmSupport = config['DEFAULT']['PlusPmSupport']
+  def _getTasmotaData(self):
+    config = self._getConfig()
+    customName = config['DEFAULT']['CustomName']
 
-    URL = self._getShellyStatusUrl()
-    if plusPmSupport == 'True' and config['ONPREMISE']['Username'] != '' and config['ONPREMISE']['Password'] != '':
-        meter_r = requests.get(url = URL, auth=HTTPDigestAuth(config['ONPREMISE']['Username'], config['ONPREMISE']['Password']))
-    else:
-        meter_r = requests.get(url = URL)
+
+    URL = self._getTasmotaStatusUrl()
+    meter_r = requests.get(url = URL)
     
     # check for response
     if not meter_r:
-        raise ConnectionError("No response from Shelly(Plus) 1PM - %s" % (URL))
+        raise ConnectionError("No response from Tasmota - %s" % (URL))
     
     meter_data = meter_r.json()     
     
     # check for Json
-    if not meter_data:
+    if not meter_data['StatusSNS'][customName]:
         raise ValueError("Converting response to JSON failed")
     
     
-    return meter_data
+    return meter_data['StatusSNS'][customName]
  
  
   def _signOfLife(self):
@@ -151,43 +133,29 @@ class DbusShelly1pmService:
  
   def _update(self):   
     try:
-       #get data from Shelly 1pm
-       meter_data = self._getShellyData()
+       #get data from Tasmota
+       meter_data = self._getTasmotaData()
        
        config = self._getConfig()
        str(config['DEFAULT']['Phase'])
     
        pvinverter_phase = str(config['DEFAULT']['Phase'])
-       plusPmSupport = str(config['DEFAULT']['PlusPmSupport'])
 
        #send data to DBus
        for phase in ['L1', 'L2', 'L3']:
          pre = '/Ac/' + phase
 
-         if phase == pvinverter_phase and plusPmSupport == 'True':
-             power = meter_data['switch:0']['apower']
-             total = meter_data['switch:0']['aenergy']['total']
-             voltage = meter_data['switch:0']['voltage']
-             current = power / voltage
+         if phase == pvinverter_phase:
 
-             self._dbusservice[pre + '/Voltage'] = voltage
-             self._dbusservice[pre + '/Current'] = current
-             self._dbusservice[pre + '/Power'] = power
-             if power > 0:
-                 self._dbusservice[pre + '/Energy/Forward'] = total/1000
-
-         elif phase == pvinverter_phase:
-
-             power = meter_data['meters'][0]['power']
-             total = meter_data['meters'][0]['total']
-             voltage = 230
-             current = power / voltage
+             power = meter_data['mainWatt']
+             voltage = meter_data['mainVolt']
+             current = meter_data['mainCurrent']
            
              self._dbusservice[pre + '/Voltage'] = voltage
              self._dbusservice[pre + '/Current'] = current
              self._dbusservice[pre + '/Power'] = power
              if power > 0:
-                 self._dbusservice[pre + '/Energy/Forward'] = total/1000/60
+                 self._dbusservice[pre + '/Energy/Forward'] = power/1000
            
          else:
            self._dbusservice[pre + '/Voltage'] = 0
@@ -261,7 +229,7 @@ def main():
       _v = lambda p, v: (str(round(v, 1)) + ' V')  
      
       #start our main-service
-      pvac_output = DbusShelly1pmService(
+      pvac_output = DbusTasmotaService(
         servicename='com.victronenergy.pvinverter',
         paths={
           '/Ac/Energy/Forward': {'initial': None, 'textformat': _kwh}, # energy produced by pv inverter
