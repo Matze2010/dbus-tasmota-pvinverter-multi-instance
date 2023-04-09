@@ -94,7 +94,7 @@ class DbusTasmotaService:
     accessType = config['DEFAULT']['AccessType']
 
     if accessType == 'OnPremise':
-        URL = "http://%s:%s@%s/cm?cmnd=status%208" % (config['ONPREMISE']['Username'], config['ONPREMISE']['Password'], config['ONPREMISE']['Host'])
+        URL = "http://%s:%s@%s/cm?cmnd=status%%208" % (config['ONPREMISE']['Username'], config['ONPREMISE']['Password'], config['ONPREMISE']['Host'])
         URL = URL.replace(":@", "")
     else:
         raise ValueError("AccessType %s is not supported" % (config['DEFAULT']['AccessType']))
@@ -137,34 +137,21 @@ class DbusTasmotaService:
        meter_data = self._getTasmotaData()
        
        config = self._getConfig()
-       str(config['DEFAULT']['Phase'])
-    
-       pvinverter_phase = str(config['DEFAULT']['Phase'])
 
        #send data to DBus
        for phase in ['L1', 'L2', 'L3']:
          pre = '/Ac/' + phase
 
-         if phase == pvinverter_phase:
-
-             power = meter_data['mainWatt']
-             voltage = meter_data['mainVolt']
-             current = meter_data['mainCurrent']
+         power = meter_data[phase + '_w']
+         voltage = meter_data[phase + '_v']
+         current = meter_data[phase + '_c']
            
-             self._dbusservice[pre + '/Voltage'] = voltage
-             self._dbusservice[pre + '/Current'] = current
-             self._dbusservice[pre + '/Power'] = power
-             if power > 0:
-                 self._dbusservice[pre + '/Energy/Forward'] = power/1000
+         self._dbusservice[pre + '/Voltage'] = voltage
+         self._dbusservice[pre + '/Current'] = current
+         self._dbusservice[pre + '/Power'] = power
            
-         else:
-           self._dbusservice[pre + '/Voltage'] = 0
-           self._dbusservice[pre + '/Current'] = 0
-           self._dbusservice[pre + '/Power'] = 0
-           self._dbusservice[pre + '/Energy/Forward'] = 0
-           
-       self._dbusservice['/Ac/Power'] = self._dbusservice['/Ac/' + pvinverter_phase + '/Power']
-       self._dbusservice['/Ac/Energy/Forward'] = self._dbusservice['/Ac/' + pvinverter_phase + '/Energy/Forward']
+       self._dbusservice['/Ac/Power'] = meter_data['mainWatt']
+       self._dbusservice['/Ac/Energy/Forward'] = meter_data['mainWatt']/1000
        
        #logging
        logging.debug("House Consumption (/Ac/Power): %s" % (self._dbusservice['/Ac/Power']))

@@ -1,0 +1,74 @@
+>D 48
+str=""
+hdr=""
+r="2,010404"
+hs4="{m}<span style='color:yellow;'>"
+hs5="</span>"
+
+invstatus1=""
+
+>B
+=>sensor53 r
+
+>S
+if sml[9]==1 {
+   invstatus1="<span style='color:green; font-weight:bold;'>On</span>"
+} else {
+  invstatus1="<span style='color:red;font-weight:bold;'>Off</span>"
+}
+
+>M 2
++1,4,c,1,-165,Gas
+1,1-0:1.8.0*255(@100,*,m³,val,18
++2,1,m,0,9600,PV1,3,5,01040023,01040005,01040009,01040035,0104005D,0104005F,01040000,01040028,0104002C,01040030,01040026,0104002A,0104002E,r0103002D0006
+%r%UUuuUUuu@i0:10,*,W,mainWatt,1
+%r%UUuuUUuu@i1:10,*,W,s1Watt,1
+%r%UUuuUUuu@i2:10,*,W,s2Watt,1
+%r%UUuuUUuu@i3:10,*,kW,todayWatt,1
+%r%UUuu@i4:10,*,C,t_inv,1
+%r%xxxxUUuu@i4:10,*,C,t_ipm,1
+%r%UUuu@i5:10,*,C,t_boost,1
+%r%UUuu@i6:1,*,,status,0
+%r%UUuuUUuu@i7:10,*,W,L1_w,1
+%r%UUuuUUuu@i8:10,*,W,L2_w,1
+%r%UUuuUUuu@i9:10,*,W,L3_w,1
+%r%UUuu@i10:10,*,V,L1_v,1
+%r%UUuu@i11:10,*,V,L2_v,1
+%r%UUuu@i12:10,*,V,L3_v,1
+%r%xxxxUUuu@i10:10,*,A,L1_c,1
+%r%xxxxUUuu@i11:10,*,A,L2_c,1
+%r%xxxxUUuu@i12:10,*,A,L3_c,1
+2,01030CUUuu@i13:1,*,,yy,0
+2,01030CxxxxUUuu@i13:1,*,,MM,0
+2,01030CxxxxxxxxUUuu@i13:1,*,,dd,0
+2,01030CxxxxxxxxxxxxUUuu@i13:1,*,,hh,0
+2,01030CxxxxxxxxxxxxxxxxUUuu@i13:1,*,,mm,0
+2,01030CxxxxxxxxxxxxxxxxxxxxUUuu@i13:1,*,,ss,0
+#
+
+; html header
+#head(hdr)
+if wm==0 {
+	wcs {s}<hr>{m}<hr>{e}
+	str="{s}<span style='color:magenta;'>"
+	wcs %str%
+	str=hdr+"</span>{e}"
+	wcs %str%
+}
+
+>W
+%=#head("Gas")
+Zählerstand %hs4% %2sml[1]% m³ %hs5%
+<br/>
+%=#head("Growatt MOD 15KTL3-X")
+Status{m}%invstatus1%
+<br/>
+Power (aktuell) %hs4% %1sml[2]% W %hs5%
+Power (heute) %hs4% %1sml[5]% kW %hs5%
+Strings %hs4% %1sml[3]% W / %1sml[4]% W %hs5%
+<br/>
+Phase L1 %hs4% %0sml[10]% W / %1sml[13]% V / %1sml[16]% A%hs5%
+Phase L2 %hs4% %0sml[11]% W / %1sml[14]% V / %1sml[17]% A%hs5%
+Phase L3 %hs4% %0sml[12]% W / %1sml[15]% V / %1sml[18]% A%hs5%
+<br/>
+Temp %hs4% %1sml[6]% C / %1sml[7]% C / %1sml[8]% C%hs5%
