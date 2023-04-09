@@ -62,7 +62,7 @@ class DbusTasmotaService:
     self._lastUpdate = 0
 
     # add _update function 'timer'
-    gobject.timeout_add(250, self._update) # pause 250ms before the next request
+    gobject.timeout_add(1001, self._update) # pause 250ms before the next request
     
     # add _signOfLife 'timer' to get feedback in log every 5minutes
     gobject.timeout_add(self._getSignOfLifeInterval()*60*1000, self._signOfLife)
@@ -137,11 +137,13 @@ class DbusTasmotaService:
        meter_data = self._getTasmotaData()
        timestamp = int(str(meter_data['yy']) + str(meter_data['MM']).zfill(2) + str(meter_data['dd']).zfill(2) + str(meter_data['hh']).zfill(2) + str(meter_data['mm']).zfill(2) + str(meter_data['ss']).zfill(2))
 
-       if meter_data['status'] != 1 or self._lastUpdate >= timestamp:
+       if meter_data['status'] != 1:
         self._dbusservice['/Connected'] = 0
         return True
-
        self._dbusservice['/Connected'] = 1
+
+      if self._lastUpdate >= timestamp:
+        return True
 
        config = self._getConfig()
 
