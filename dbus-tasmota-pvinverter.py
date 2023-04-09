@@ -135,9 +135,13 @@ class DbusTasmotaService:
     try:
        #get data from Tasmota
        meter_data = self._getTasmotaData()
-       
-       if meter_data['status'] == 0:
-        return true
+       timestamp = int(str(meter_data['yy']) + str(meter_data['MM']).zfill(2) + str(meter_data['dd']).zfill(2) + str(meter_data['hh']).zfill(2) + str(meter_data['mm']).zfill(2) + str(meter_data['ss']).zfill(2))
+
+       if meter_data['status'] != 1 or self._lastUpdate >= timestamp:
+        self._dbusservice['/Connected'] = 0
+        return True
+
+       self._dbusservice['/Connected'] = 1
 
        config = self._getConfig()
 
@@ -152,11 +156,11 @@ class DbusTasmotaService:
          self._dbusservice[pre + '/Voltage'] = voltage
          self._dbusservice[pre + '/Current'] = current
          self._dbusservice[pre + '/Power'] = power
-         self._dbusservice[pre + 'Energy/Forward'] = power/1000
+         self._dbusservice[pre + '/Energy/Forward'] = power/1000
            
        self._dbusservice['/Ac/Power'] = meter_data['mainWatt']
        self._dbusservice['/Ac/Energy/Forward'] = meter_data['mainWatt']/1000
-       
+
        #logging
        logging.debug("House Consumption (/Ac/Power): %s" % (self._dbusservice['/Ac/Power']))
        logging.debug("House Forward (/Ac/Energy/Forward): %s" % (self._dbusservice['/Ac/Energy/Forward']))
@@ -169,7 +173,7 @@ class DbusTasmotaService:
        self._dbusservice['/UpdateIndex'] = index
 
        #update lastupdate vars
-       self._lastUpdate = time.time()              
+       self._lastUpdate = timestamp             
     except Exception as e:
        logging.critical('Error at %s', '_update', exc_info=e)
        
