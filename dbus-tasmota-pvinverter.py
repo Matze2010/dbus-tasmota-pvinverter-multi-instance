@@ -136,6 +136,9 @@ class DbusTasmotaService:
        #get data from Tasmota
        meter_data = self._getTasmotaData()
        
+       if meter_data['status'] == 0:
+        return true
+
        config = self._getConfig()
 
        #send data to DBus
@@ -149,6 +152,7 @@ class DbusTasmotaService:
          self._dbusservice[pre + '/Voltage'] = voltage
          self._dbusservice[pre + '/Current'] = current
          self._dbusservice[pre + '/Power'] = power
+         self._dbusservice[pre + 'Energy/Forward'] = power/1000
            
        self._dbusservice['/Ac/Power'] = meter_data['mainWatt']
        self._dbusservice['/Ac/Energy/Forward'] = meter_data['mainWatt']/1000
@@ -221,9 +225,6 @@ def main():
         paths={
           '/Ac/Energy/Forward': {'initial': None, 'textformat': _kwh}, # energy produced by pv inverter
           '/Ac/Power': {'initial': 0, 'textformat': _w},
-          
-          '/Ac/Current': {'initial': 0, 'textformat': _a},
-          '/Ac/Voltage': {'initial': 0, 'textformat': _v},
           
           '/Ac/L1/Voltage': {'initial': 0, 'textformat': _v},
           '/Ac/L2/Voltage': {'initial': 0, 'textformat': _v},
