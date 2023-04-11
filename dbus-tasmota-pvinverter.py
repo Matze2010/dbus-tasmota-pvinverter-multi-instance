@@ -11,7 +11,7 @@ if sys.version_info.major == 2:
 else:
     from gi.repository import GLib as gobject
 import sys
-import time
+import datetime
 import requests # for http GET
 import configparser # for config/ini file
 from requests.auth import HTTPDigestAuth
@@ -62,7 +62,7 @@ class DbusTasmotaService:
     self._lastUpdate = 0
 
     # add _update function 'timer'
-    gobject.timeout_add(1001, self._update) # pause 250ms before the next request
+    gobject.timeout_add(500, self._update) # pause 250ms before the next request
     
     # add _signOfLife 'timer' to get feedback in log every 5minutes
     gobject.timeout_add(self._getSignOfLifeInterval()*60*1000, self._signOfLife)
@@ -112,16 +112,30 @@ class DbusTasmotaService:
     
     # check for response
     if not meter_r:
+        self._dbusservice['/Connected'] = 0
         raise ConnectionError("No response from Tasmota - %s" % (URL))
     
     meter_data = meter_r.json()     
     
     # check for Json
     if not meter_data['StatusSNS'][customName]:
+        self._dbusservice['/Connected'] = 0
         raise ValueError("Converting response to JSON failed")
     
-    
+    self._dbusservice['/Connected'] = 1
     return meter_data['StatusSNS'][customName]
+
+
+  def _getStatusCode(self, json):
+    status = json['status']
+
+    if status == 0:
+       return 0
+    elif status == 1:
+       return 7
+    else:
+       return 10 
+
  
  
   def _signOfLife(self):
@@ -135,17 +149,11 @@ class DbusTasmotaService:
     try:
        #get data from Tasmota
        meter_data = self._getTasmotaData()
-       timestamp = int(str(meter_data['yy']) + str(meter_data['MM']).zfill(2) + str(meter_data['dd']).zfill(2) + str(meter_data['hh']).zfill(2) + str(meter_data['mm']).zfill(2) + str(meter_data['ss']).zfill(2))
 
-       if meter_data['status'] != 1:
-        self._dbusservice['/Connected'] = 0
-        return True
-       self._dbusservice['/Connected'] = 1
-
-      if self._lastUpdate >= timestamp:
-        return True
+       #inverterTime = datetime.datetime(meter_data['yy'],meter_data['MM'],meter_data['dd'],meter_data['hh'],meter_data['mm'],meter_data['ss'])   
 
        config = self._getConfig()
+       statusCode = self._getStatusCode(meter_data)
 
        #send data to DBus
        for phase in ['L1', 'L2', 'L3']:
@@ -162,6 +170,7 @@ class DbusTasmotaService:
            
        self._dbusservice['/Ac/Power'] = meter_data['mainWatt']
        self._dbusservice['/Ac/Energy/Forward'] = meter_data['mainWatt']/1000
+       self._dbusservice['/StatusCode'] = statusCode
 
        #logging
        logging.debug("House Consumption (/Ac/Power): %s" % (self._dbusservice['/Ac/Power']))
@@ -175,7 +184,7 @@ class DbusTasmotaService:
        self._dbusservice['/UpdateIndex'] = index
 
        #update lastupdate vars
-       self._lastUpdate = timestamp             
+       self._lastUpdate = datetime.datetime.now()             
     except Exception as e:
        logging.critical('Error at %s', '_update', exc_info=e)
        
