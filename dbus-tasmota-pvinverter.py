@@ -104,7 +104,7 @@ class DbusTasmotaService:
  
   def _getTasmotaData(self):
     config = self._getConfig()
-    customName = config['DEFAULT']['CustomName']
+    section = config['DEFAULT']['JsonSection']
 
 
     URL = self._getTasmotaStatusUrl()
@@ -118,12 +118,12 @@ class DbusTasmotaService:
     meter_data = meter_r.json()     
     
     # check for Json
-    if not meter_data['StatusSNS'][customName]:
+    if not meter_data['StatusSNS'][section]:
         self._dbusservice['/Connected'] = 0
         raise ValueError("Converting response to JSON failed")
     
     self._dbusservice['/Connected'] = 1
-    return meter_data['StatusSNS'][customName]
+    return meter_data['StatusSNS'][section]
 
 
   def _getStatusCode(self, json):
