@@ -166,10 +166,10 @@ class DbusTasmotaService:
          self._dbusservice[pre + '/Voltage'] = voltage
          self._dbusservice[pre + '/Current'] = current
          self._dbusservice[pre + '/Power'] = power
-         self._dbusservice[pre + '/Energy/Forward'] = power/1000
+         self._dbusservice[pre + '/Energy/Forward'] = float(power)/1000
            
        self._dbusservice['/Ac/Power'] = meter_data['mainWatt']
-       self._dbusservice['/Ac/Energy/Forward'] = meter_data['mainWatt']/1000
+       self._dbusservice['/Ac/Energy/Forward'] = float(meter_data['mainWatt'])/1000
        self._dbusservice['/StatusCode'] = statusCode
 
        #logging
