@@ -21,6 +21,7 @@
 ;#define SML_MAX_VARS 50
 
 >D 48
+seconds=15
 str=""
 hdr=""
 r="2,010404"
@@ -28,16 +29,69 @@ hs4="{m}<span style='color:yellow;'>"
 hs5="</span>"
 
 invstatus1=""
+invstatus2=""
+
+t:timer1=-1
+t:timer2=-1
+
+lastupdate1=0
+lastupdate2=0
+
+summe=0
+phase_l1=0
+phase_l2=0
+phase_l3=0
 
 >B
 =>sensor53 r
 
 >S
-if sml[9]==1 {
-   invstatus1="<span style='color:green; font-weight:bold;'>On</span>"
-} else {
-  invstatus1="<span style='color:red;font-weight:bold;'>Off</span>"
+
+lastupdate1=sml[25]
+if timer1>0 {
+;print Timer %timer1% %sml[9]%
+if chg[lastupdate1]>0 {
+;print Timer reset
+timer1=seconds
 }
+if sml[9]==0 {
+print Timer stopped
+timer1=-1
+}
+} 
+
+if timer1==0 {
+print restart SML
+timer1=seconds
+=> sensor53 r
+}
+
+if timer1==-1 {
+if sml[9]==1 {
+ print Timer restarted
+ timer1=seconds
+}
+}
+
+
+if sml[9]==1 {
+   invstatus1="<span style='color:green;'>On</span>"
+} 
+if sml[9]==0 {
+  invstatus1="<span style='color:orange;'>Off</span>"
+}
+if sml[9]==3 {
+  invstatus1="<span style='color:red;'>Fault</span>"
+}
+
+>F
+summe=sml[10]+sml[11]+sml[12]
+phase_l1 = sml[10]/summe*sml[2]
+phase_l2 = sml[11]/summe*sml[2]
+phase_l3 = sml[12]/summe*sml[2]
+
+>J
+,"PV1a":{"mainWatt":%sml[2]%,"L1_w":%phase_l1%,"L2_w":%phase_l2%,"L3_w":%phase_l3%,"L1_v":%sml[13]%,"L2_v":%sml[14]%,"L3_v":%sml[15]%,"L1_c":%sml[16]%,"L2_c":%sml[17]%,"L3_c":%sml[18]%}
 
 >M 2
 +1,4,c,1,-165,Gas
@@ -66,6 +120,7 @@ if sml[9]==1 {
 2,01030CxxxxxxxxxxxxUUuu@i13:1,*,,hh,0
 2,01030CxxxxxxxxxxxxxxxxUUuu@i13:1,*,,mm,0
 2,01030CxxxxxxxxxxxxxxxxxxxxUUuu@i13:1,*,,ss,0
+2,01030CUUuuUUuuUUuuUUuuUUuuUUuu@i13:1,*,,timestamp,0
 #
 
 ; html header
@@ -83,14 +138,14 @@ if wm==0 {
 Zählerstand %hs4% %2sml[1]% m³ %hs5%
 <br/>
 %=#head("Growatt MOD 15KTL3-X")
-Status{m}%invstatus1%
+Status %invstatus1%
 <br/>
 Power (aktuell) %hs4% %1sml[2]% W %hs5%
 Power (heute) %hs4% %1sml[5]% kW %hs5%
 Strings %hs4% %1sml[3]% W / %1sml[4]% W %hs5%
 <br/>
-Phase L1 %hs4% %0sml[10]% W / %1sml[13]% V / %1sml[16]% A%hs5%
-Phase L2 %hs4% %0sml[11]% W / %1sml[14]% V / %1sml[17]% A%hs5%
-Phase L3 %hs4% %0sml[12]% W / %1sml[15]% V / %1sml[18]% A%hs5%
+Phase L1 %hs4% %0phase_l1% W (%0sml[10]% W) / %1sml[13]% V / %1sml[16]% A%hs5%
+Phase L2 %hs4% %0phase_l2% W (%0sml[11]% W) / %1sml[14]% V / %1sml[17]% A%hs5%
+Phase L3 %hs4% %0phase_l3% W (%0sml[12]% W) / %1sml[15]% V / %1sml[18]% A%hs5%
 <br/>
 Temp %hs4% %1sml[6]% C / %1sml[7]% C / %1sml[8]% C%hs5%
