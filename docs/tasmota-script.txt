@@ -91,7 +91,7 @@ phase_l2 = sml[11]/summe*sml[2]
 phase_l3 = sml[12]/summe*sml[2]
 
 >J
-,"PV1a":{"mainWatt":%sml[2]%,"L1_w":%phase_l1%,"L2_w":%phase_l2%,"L3_w":%phase_l3%,"L1_v":%sml[13]%,"L2_v":%sml[14]%,"L3_v":%sml[15]%,"L1_c":%sml[16]%,"L2_c":%sml[17]%,"L3_c":%sml[18]%}
+,"PV1a":{"status":%0sml[9]%,"mainWatt":%1sml[2]%,"L1_w":%1phase_l1%,"L2_w":%1phase_l2%,"L3_w":%1phase_l3%,"L1_v":%1sml[13]%,"L2_v":%1sml[14]%,"L3_v":%1sml[15]%,"L1_c":%1sml[16]%,"L2_c":%1sml[17]%,"L3_c":%1sml[18]%}
 
 >M 2
 +1,4,c,1,-165,Gas
