@@ -42,6 +42,9 @@ phase_l1=0
 phase_l2=0
 phase_l3=0
 
+display=0
+M:res=0 3
+
 >B
 =>sensor53 r
 
@@ -86,9 +89,25 @@ if sml[9]==3 {
 
 >F
 summe=sml[10]+sml[11]+sml[12]
+if summe>0 {
 phase_l1 = sml[10]/summe*sml[2]
 phase_l2 = sml[11]/summe*sml[2]
 phase_l3 = sml[12]/summe*sml[2]
+} else {
+phase_l1 = 0
+phase_l2 = 0
+phase_l3 = 0
+}
+
+if display==0 {
+res[1]=phase_l1
+res[2]=phase_l2
+res[3]=phase_l3
+} else {
+res[1]=sml[10]
+res[2]=sml[11]
+res[3]=sml[12]
+}
 
 >J
 ,"PV1a":{"status":%0sml[9]%,"mainWatt":%1sml[2]%,"L1_w":%1phase_l1%,"L2_w":%1phase_l2%,"L3_w":%1phase_l3%,"L1_v":%1sml[13]%,"L2_v":%1sml[14]%,"L3_v":%1sml[15]%,"L1_c":%1sml[16]%,"L2_c":%1sml[17]%,"L3_c":%1sml[18]%}
@@ -144,8 +163,10 @@ Power (aktuell) %hs4% %1sml[2]% W %hs5%
 Power (heute) %hs4% %1sml[5]% kW %hs5%
 Strings %hs4% %1sml[3]% W / %1sml[4]% W %hs5%
 <br/>
-Phase L1 %hs4% %0phase_l1% W (%0sml[10]% W) / %1sml[13]% V / %1sml[16]% A%hs5%
-Phase L2 %hs4% %0phase_l2% W (%0sml[11]% W) / %1sml[14]% V / %1sml[17]% A%hs5%
-Phase L3 %hs4% %0phase_l3% W (%0sml[12]% W) / %1sml[15]% V / %1sml[18]% A%hs5%
+Phase L1 %hs4% %0res[1]% W / %1sml[13]% V / %1sml[16]% A%hs5%
+Phase L2 %hs4% %0res[2]% W / %1sml[14]% V / %1sml[17]% A%hs5%
+Phase L3 %hs4% %0res[3]% W / %1sml[15]% V / %1sml[18]% A%hs5%
 <br/>
 Temp %hs4% %1sml[6]% C / %1sml[7]% C / %1sml[8]% C%hs5%
+
+bu(display "Phasenwerte - tech" "Phasenwerte - real")
