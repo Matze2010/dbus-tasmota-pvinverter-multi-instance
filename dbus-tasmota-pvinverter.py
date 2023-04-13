@@ -39,8 +39,8 @@ class DbusTasmotaService:
     
     # Create the mandatory objects
     self._dbusservice.add_path('/DeviceInstance', deviceinstance)
-    #self._dbusservice.add_path('/ProductId', 16) # value used in ac_sensor_bridge.cpp of dbus-cgwacs
-    self._dbusservice.add_path('/ProductId', 0xFFFF) # id assigned by Victron Support from SDM630v2.py
+    self._dbusservice.add_path('/ProductId', 0xA141) # value used in https://github.com/victronenergy/dbus_vebus_to_pvinverter/blob/master/dbus_vebus_to_pvinverter.py
+    #self._dbusservice.add_path('/ProductId', 0xFFFF) # id assigned by Victron Support from SDM630v2.py
     self._dbusservice.add_path('/ProductName', productname)
     self._dbusservice.add_path('/CustomName', customname)    
     self._dbusservice.add_path('/Connected', 1)
