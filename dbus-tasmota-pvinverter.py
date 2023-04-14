@@ -164,7 +164,7 @@ class DbusTasmotaService:
        for phase in ['L1', 'L2', 'L3']:
          pre = '/Ac/' + phase
 
-         if statusCode == 1:
+         if statusCode == 7:
              power = meter_data[phase + '_w']
              voltage = meter_data[phase + '_v']
              current = meter_data[phase + '_c']
@@ -176,7 +176,7 @@ class DbusTasmotaService:
          self._dbusservice[pre + '/Power'] = power
          self._dbusservice[pre + '/Energy/Forward'] = float(power)/1000
        
-       if statusCode == 1:
+       if statusCode == 7:
            mainWatt = meter_data['mainWatt']
        else:
            mainWatt = 0
