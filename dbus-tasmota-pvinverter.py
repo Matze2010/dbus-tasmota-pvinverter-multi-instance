@@ -52,6 +52,7 @@ class DbusTasmotaService:
     self._dbusservice.add_path('/Serial', self._getTasmotaSerial())
     self._dbusservice.add_path('/UpdateIndex', 0)
     self._dbusservice.add_path('/StatusCode', 0)  # Dummy path so VRM detects us as a PV-inverter.
+    self._dbusservice.add_path('/ErrorCode', 0)
     
     # add path values to dbus
     for path, settings in self._paths.items():
@@ -112,14 +113,16 @@ class DbusTasmotaService:
     
     # check for response
     if not meter_r:
-        self._dbusservice['/Connected'] = 0
+        self._dbusservice['/Connected'] = 115
+        self._dbusservice['/ErrorCode'] = 11
         raise ConnectionError("No response from Tasmota - %s" % (URL))
     
     meter_data = meter_r.json()     
     
     # check for Json
     if not meter_data['StatusSNS'][section]:
-        self._dbusservice['/Connected'] = 0
+        self._dbusservice['/Connected'] = 115
+        self._dbusservice['/ErrorCode'] = 12
         raise ValueError("Converting response to JSON failed")
     
     self._dbusservice['/Connected'] = 1
@@ -130,12 +133,14 @@ class DbusTasmotaService:
     status = json['status']
 
     if status == 0:
+       self._dbusservice['/ErrorCode'] = 0
        return 0
     elif status == 1:
+       self._dbusservice['/ErrorCode'] = 0
        return 7
     else:
+       self._dbusservice['/ErrorCode'] = 34
        return 10 
-
  
  
   def _signOfLife(self):
@@ -159,17 +164,25 @@ class DbusTasmotaService:
        for phase in ['L1', 'L2', 'L3']:
          pre = '/Ac/' + phase
 
-         power = meter_data[phase + '_w']
-         voltage = meter_data[phase + '_v']
-         current = meter_data[phase + '_c']
+         if statusCode == 1:
+             power = meter_data[phase + '_w']
+             voltage = meter_data[phase + '_v']
+             current = meter_data[phase + '_c']
+         else:
+             power = voltage = current = 0
            
          self._dbusservice[pre + '/Voltage'] = voltage
          self._dbusservice[pre + '/Current'] = current
          self._dbusservice[pre + '/Power'] = power
          self._dbusservice[pre + '/Energy/Forward'] = float(power)/1000
+       
+       if statusCode == 1:
+           mainWatt = meter_data['mainWatt']
+       else:
+           mainWatt = 0
            
-       self._dbusservice['/Ac/Power'] = meter_data['mainWatt']
-       self._dbusservice['/Ac/Energy/Forward'] = float(meter_data['mainWatt'])/1000
+       self._dbusservice['/Ac/Power'] = mainWatt
+       self._dbusservice['/Ac/Energy/Forward'] = float(mainWatt)/1000
        self._dbusservice['/StatusCode'] = statusCode
 
        #logging
