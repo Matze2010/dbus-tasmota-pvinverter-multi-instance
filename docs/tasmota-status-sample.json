@@ -1,1 +1,53 @@
-{"StatusSNS":{"Time":"2023-04-08T15:58:42","Gas":{"val":326.08},"PV":{"mainVolt":234.1,"mainCurrent":3.5,"mainWatt":2607.5,"s1Watt":1272.8,"s2Watt":976.5,"todayWatt":28.6,"temp_inv":60.6,"temp_ipm":35.7,"temp_boost":32.5,"status":1,"year":2023,"month":4,"day":8,"hour":16,"minute":57,"second":56}}}
+{
+    "StatusSNS":
+    {
+        "Time": "2023-04-18T04:45:50",
+        "Gas":
+        {
+            "val": 391.15
+        },
+        "PV1":
+        {
+            "mainWatt": 0.0,
+            "s1Watt": 0.0,
+            "s2Watt": 0.0,
+            "todayWatt": 0.0,
+            "t_inv": 0.0,
+            "t_ipm": 0.0,
+            "t_boost": 0.0,
+            "status": 0,
+            "L1_w": 0.0,
+            "L2_w": 0.0,
+            "L3_w": 0.0,
+            "L1_v": 0.0,
+            "L2_v": 0.0,
+            "L3_v": 0.0,
+            "L1_c": 0.0,
+            "L2_c": 0.0,
+            "L3_c": 0.0,
+            "yy": 0,
+            "MM": 0,
+            "dd": 0,
+            "hh": 0,
+            "mm": 0,
+            "ss": 0,
+            "timestamp": 0,
+            "totalEnergie": 0.0
+        },
+        "PV1a":
+        {
+            "status": 0,
+            "mainWatt": 0,
+            "L1_w": 0,
+            "L2_w": 0,
+            "L3_w": 0,
+            "L1_v": 0.0,
+            "L2_v": 0.0,
+            "L3_v": 0.0,
+            "L1_c": 0.0,
+            "L2_c": 0.0,
+            "L3_c": 0.0,
+            "totalEnergie": 0.0
+        }
+    }
+}

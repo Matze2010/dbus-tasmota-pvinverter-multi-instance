@@ -174,7 +174,6 @@ class DbusTasmotaService:
          self._dbusservice[pre + '/Voltage'] = voltage
          self._dbusservice[pre + '/Current'] = current
          self._dbusservice[pre + '/Power'] = power
-         self._dbusservice[pre + '/Energy/Forward'] = float(power)/1000
        
        if statusCode == 7:
            mainWatt = meter_data['mainWatt']
@@ -182,8 +181,8 @@ class DbusTasmotaService:
            mainWatt = 0
            
        self._dbusservice['/Ac/Power'] = mainWatt
-       self._dbusservice['/Ac/Energy/Forward'] = float(mainWatt)/1000
        self._dbusservice['/StatusCode'] = statusCode
+       self._dbusservice['/Ac/Energy/Forward'] = float(meter_data['totalEnergie'])
 
        #logging
        logging.debug("House Consumption (/Ac/Power): %s" % (self._dbusservice['/Ac/Power']))
@@ -263,9 +262,6 @@ def main():
           '/Ac/L1/Power': {'initial': 0, 'textformat': _w},
           '/Ac/L2/Power': {'initial': 0, 'textformat': _w},
           '/Ac/L3/Power': {'initial': 0, 'textformat': _w},
-          '/Ac/L1/Energy/Forward': {'initial': None, 'textformat': _kwh},
-          '/Ac/L2/Energy/Forward': {'initial': None, 'textformat': _kwh},
-          '/Ac/L3/Energy/Forward': {'initial': None, 'textformat': _kwh},
         })
      
       logging.info('Connected to dbus, and switching over to gobject.MainLoop() (= event based)')

@@ -29,13 +29,9 @@ hs4="{m}<span style='color:yellow;'>"
 hs5="</span>"
 
 invstatus1=""
-invstatus2=""
-
 t:timer1=-1
-t:timer2=-1
-
 lastupdate1=0
-lastupdate2=0
+totals=0
 
 summe=0
 phase_l1=0
@@ -87,6 +83,10 @@ if sml[9]==3 {
   invstatus1="<span style='color:red;'>Fault</span>"
 }
 
+if sml[26]>0 {
+totals=sml[26]
+}
+
 >F
 summe=sml[10]+sml[11]+sml[12]
 if summe>0 {
@@ -110,12 +110,12 @@ res[3]=sml[12]
 }
 
 >J
-,"PV1a":{"status":%0sml[9]%,"mainWatt":%1sml[2]%,"L1_w":%1phase_l1%,"L2_w":%1phase_l2%,"L3_w":%1phase_l3%,"L1_v":%1sml[13]%,"L2_v":%1sml[14]%,"L3_v":%1sml[15]%,"L1_c":%1sml[16]%,"L2_c":%1sml[17]%,"L3_c":%1sml[18]%}
+,"PV1a":{"status":%0sml[9]%,"mainWatt":%0sml[2]%,"L1_w":%0phase_l1%,"L2_w":%0phase_l2%,"L3_w":%0phase_l3%,"L1_v":%1sml[13]%,"L2_v":%1sml[14]%,"L3_v":%1sml[15]%,"L1_c":%1sml[16]%,"L2_c":%1sml[17]%,"L3_c":%1sml[18]%,"totalEnergie":%1totals%}
 
 >M 2
 +1,4,c,1,-165,Gas
 1,1-0:1.8.0*255(@100,*,m³,val,18
-+2,1,m,0,9600,PV1,3,5,01040023,01040005,01040009,01040035,0104005D,0104005F,01040000,01040028,0104002C,01040030,01040026,0104002A,0104002E,r0103002D0006
++2,1,m,0,9600,PV1,3,1,01040023,01040005,01040009,01040035,0104005D,0104005F,01040000,01040028,0104002C,01040030,01040026,0104002A,0104002E,r0103002D0006,01040037
 %r%UUuuUUuu@i0:10,*,W,mainWatt,1
 %r%UUuuUUuu@i1:10,*,W,s1Watt,1
 %r%UUuuUUuu@i2:10,*,W,s2Watt,1
@@ -140,6 +140,7 @@ res[3]=sml[12]
 2,01030CxxxxxxxxxxxxxxxxUUuu@i13:1,*,,mm,0
 2,01030CxxxxxxxxxxxxxxxxxxxxUUuu@i13:1,*,,ss,0
 2,01030CUUuuUUuuUUuuUUuuUUuuUUuu@i13:1,*,,timestamp,0
+%r%UUuuUUuu@i14:10,*,kW,totalEnergie,1
 #
 
 ; html header
@@ -161,6 +162,7 @@ Status %invstatus1%
 <br/>
 Power (aktuell) %hs4% %1sml[2]% W %hs5%
 Power (heute) %hs4% %1sml[5]% kW %hs5%
+Power (total) %hs4% %1totals% kW %hs5%
 Strings %hs4% %1sml[3]% W / %1sml[4]% W %hs5%
 <br/>
 Phase L1 %hs4% %0res[1]% W / %1sml[13]% V / %1sml[16]% A%hs5%
