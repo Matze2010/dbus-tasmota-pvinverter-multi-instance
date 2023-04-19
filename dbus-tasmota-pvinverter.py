@@ -175,14 +175,18 @@ class DbusTasmotaService:
          self._dbusservice[pre + '/Current'] = current
          self._dbusservice[pre + '/Power'] = power
        
-       if statusCode == 7:
+       if statusCode == 7:     
            mainWatt = meter_data['mainWatt']
-       else:
+           totalEnergie = float(meter_data['totalEnergie'])
+       else:                                 
            mainWatt = 0
-           
+           totalEnergie = 0
+                              
        self._dbusservice['/Ac/Power'] = mainWatt
        self._dbusservice['/StatusCode'] = statusCode
-       self._dbusservice['/Ac/Energy/Forward'] = float(meter_data['totalEnergie'])
+
+       if totalEnergie > 0:    
+           self._dbusservice['/Ac/Energy/Forward'] = totalEnergie 
 
        #logging
        logging.debug("House Consumption (/Ac/Power): %s" % (self._dbusservice['/Ac/Power']))
