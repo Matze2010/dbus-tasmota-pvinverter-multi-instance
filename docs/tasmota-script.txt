@@ -20,6 +20,9 @@
 ;#define MAXSVARS 30
 ;#define SML_MAX_VARS 50
 
+;#define USE_ETHERNET
+;#define USE_WT32_ETH01 
+
 >D 48
 seconds=15
 str=""
