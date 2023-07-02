@@ -27,7 +27,7 @@
 seconds=15
 str=""
 hdr=""
-r="2,010404"
+r="1,010404"
 hs4="{m}<span style='color:yellow;'>"
 hs5="</span>"
 
@@ -49,14 +49,14 @@ M:res=0 3
 
 >S
 
-lastupdate1=sml[25]
+lastupdate1=sml[24]
 if timer1>0 {
-;print Timer %timer1% %sml[9]%
+;print Timer %timer1% %sml[8]%
 if chg[lastupdate1]>0 {
 ;print Timer reset
 timer1=seconds
 }
-if sml[9]==0 {
+if sml[8]==0 {
 print Timer stopped
 timer1=-1
 }
@@ -69,33 +69,33 @@ timer1=seconds
 }
 
 if timer1==-1 {
-if sml[9]==1 {
+if sml[8]==1 {
  print Timer restarted
  timer1=seconds
 }
 }
 
 
-if sml[9]==1 {
+if sml[8]==1 {
    invstatus1="<span style='color:green;'>On</span>"
 } 
-if sml[9]==0 {
+if sml[8]==0 {
   invstatus1="<span style='color:orange;'>Off</span>"
 }
-if sml[9]==3 {
+if sml[8]==3 {
   invstatus1="<span style='color:red;'>Fault</span>"
 }
 
-if sml[26]>0 {
-totals=sml[26]
+if sml[25]>0 {
+totals=sml[25]
 }
 
 >F
-summe=sml[10]+sml[11]+sml[12]
+summe=sml[9]+sml[10]+sml[11]
 if summe>0 {
-phase_l1 = sml[10]/summe*sml[2]
-phase_l2 = sml[11]/summe*sml[2]
-phase_l3 = sml[12]/summe*sml[2]
+phase_l1 = sml[9]/summe*sml[1]
+phase_l2 = sml[10]/summe*sml[1]
+phase_l3 = sml[11]/summe*sml[1]
 } else {
 phase_l1 = 0
 phase_l2 = 0
@@ -107,18 +107,16 @@ res[1]=phase_l1
 res[2]=phase_l2
 res[3]=phase_l3
 } else {
-res[1]=sml[10]
-res[2]=sml[11]
-res[3]=sml[12]
+res[1]=sml[9]
+res[2]=sml[10]
+res[3]=sml[11]
 }
 
 >J
-,"PV1a":{"status":%0sml[9]%,"mainWatt":%0sml[2]%,"L1_w":%0phase_l1%,"L2_w":%0phase_l2%,"L3_w":%0phase_l3%,"L1_v":%1sml[13]%,"L2_v":%1sml[14]%,"L3_v":%1sml[15]%,"L1_c":%1sml[16]%,"L2_c":%1sml[17]%,"L3_c":%1sml[18]%,"totalEnergie":%1totals%}
+,"PV1a":{"status":%0sml[8]%,"todayWatt":%1sml[3]%,"mainWatt":%0sml[1]%,"L1_w":%0phase_l1%,"L2_w":%0phase_l2%,"L3_w":%0phase_l3%,"L1_v":%1sml[12]%,"L2_v":%1sml[13]%,"L3_v":%1sml[14]%,"L1_c":%1sml[15]%,"L2_c":%1sml[16]%,"L3_c":%1sml[17]%,"totalEnergie":%1totals%}
 
->M 2
-+1,4,c,1,-165,Gas
-1,1-0:1.8.0*255(@100,*,m³,val,18
-+2,1,m,0,9600,PV1,3,1,01040023,01040005,01040009,01040035,0104005D,0104005F,01040000,01040028,0104002C,01040030,01040026,0104002A,0104002E,r0103002D0006,01040037
+>M 1
++1,17,m,0,9600,PV1,5,1,01040023,01040005,01040009,01040035,0104005D,0104005F,01040000,01040028,0104002C,01040030,01040026,0104002A,0104002E,r0103002D0006,01040037
 %r%UUuuUUuu@i0:10,*,W,mainWatt,1
 %r%UUuuUUuu@i1:10,*,W,s1Watt,1
 %r%UUuuUUuu@i2:10,*,W,s2Watt,1
@@ -136,13 +134,13 @@ res[3]=sml[12]
 %r%xxxxUUuu@i10:10,*,A,L1_c,1
 %r%xxxxUUuu@i11:10,*,A,L2_c,1
 %r%xxxxUUuu@i12:10,*,A,L3_c,1
-2,01030CUUuu@i13:1,*,,yy,0
-2,01030CxxxxUUuu@i13:1,*,,MM,0
-2,01030CxxxxxxxxUUuu@i13:1,*,,dd,0
-2,01030CxxxxxxxxxxxxUUuu@i13:1,*,,hh,0
-2,01030CxxxxxxxxxxxxxxxxUUuu@i13:1,*,,mm,0
-2,01030CxxxxxxxxxxxxxxxxxxxxUUuu@i13:1,*,,ss,0
-2,01030CUUuuUUuuUUuuUUuuUUuuUUuu@i13:1,*,,timestamp,0
+1,01030CUUuu@i13:1,*,,yy,0
+1,01030CxxxxUUuu@i13:1,*,,MM,0
+1,01030CxxxxxxxxUUuu@i13:1,*,,dd,0
+1,01030CxxxxxxxxxxxxUUuu@i13:1,*,,hh,0
+1,01030CxxxxxxxxxxxxxxxxUUuu@i13:1,*,,mm,0
+1,01030CxxxxxxxxxxxxxxxxxxxxUUuu@i13:1,*,,ss,0
+1,01030CUUuuUUuuUUuuUUuuUUuuUUuu@i13:1,*,,timestamp,0
 %r%UUuuUUuu@i14:10,*,kW,totalEnergie,1
 #
 
@@ -157,21 +155,17 @@ if wm==0 {
 }
 
 >W
-%=#head("Gas")
-Zählerstand %hs4% %2sml[1]% m³ %hs5%
-<br/>
-%=#head("Growatt MOD 15KTL3-X")
 Status %invstatus1%
 <br/>
-Power (aktuell) %hs4% %1sml[2]% W %hs5%
-Power (heute) %hs4% %1sml[5]% kW %hs5%
+Power (aktuell)   %hs4% %1sml[1]% W %hs5%
+Power (heute) %hs4% %1sml[4]% kW %hs5%
 Power (total) %hs4% %1totals% kW %hs5%
-Strings %hs4% %1sml[3]% W / %1sml[4]% W %hs5%
+Strings %hs4% %1sml[2]% W / %1sml[3]% W %hs5%
 <br/>
-Phase L1 %hs4% %0res[1]% W / %1sml[13]% V / %1sml[16]% A%hs5%
-Phase L2 %hs4% %0res[2]% W / %1sml[14]% V / %1sml[17]% A%hs5%
-Phase L3 %hs4% %0res[3]% W / %1sml[15]% V / %1sml[18]% A%hs5%
+Phase L1 %hs4% %0res[1]% W / %1sml[12]% V / %1sml[15]% A%hs5%
+Phase L2 %hs4% %0res[2]% W / %1sml[13]% V / %1sml[16]% A%hs5%
+Phase L3 %hs4% %0res[3]% W / %1sml[14]% V / %1sml[17]% A%hs5%
 <br/>
-Temp %hs4% %1sml[6]% C / %1sml[7]% C / %1sml[8]% C%hs5%
+Temp %hs4% %1sml[5]% C / %1sml[6]% C / %1sml[7]% C%hs5%
 
 bu(display "Phasenwerte - tech" "Phasenwerte - real")
