@@ -21,7 +21,8 @@
 ;#define SML_MAX_VARS 50
 
 ;#define USE_ETHERNET
-;#define USE_WT32_ETH01 
+;#define USE_WT32_ETH01
+;#define TELE_PERIOD 1
 
 >D 48
 seconds=15
@@ -117,7 +118,7 @@ res[3]=sml[11]
 
 >M 1
 +1,17,m,0,9600,pv,5,1,01040023,01040005,01040009,01040035,0104005D,0104005F,01040000,01040028,0104002C,01040030,01040026,0104002A,0104002E,r0103002D0006,01040037
-%r%UUuuUUuu@i0:10,*,W,power,16
+%r%UUuuUUuu@i0:10,*,W,power,3
 %r%UUuuUUuu@i1:10,*,W,s1power,1
 %r%UUuuUUuu@i2:10,*,W,s2power,1
 %r%UUuuUUuu@i3:10,*,kW,todayWatt,1
@@ -125,9 +126,9 @@ res[3]=sml[11]
 %r%xxxxUUuu@i4:10,*,C,t_ipm,1
 %r%UUuu@i5:10,*,C,t_boost,1
 %r%UUuu@i6:1,*,,status,0
-%r%UUuuUUuu@i7:10,*,W,power_L1,16
-%r%UUuuUUuu@i8:10,*,W,power_L2,16
-%r%UUuuUUuu@i9:10,*,W,power_L3,16
+%r%UUuuUUuu@i7:10,*,W,power_L1,3
+%r%UUuuUUuu@i8:10,*,W,power_L2,3
+%r%UUuuUUuu@i9:10,*,W,power_L3,3
 %r%UUuu@i10:10,*,V,L1_v,1
 %r%UUuu@i11:10,*,V,L2_v,1
 %r%UUuu@i12:10,*,V,L3_v,1
@@ -141,7 +142,7 @@ res[3]=sml[11]
 1,01030CxxxxxxxxxxxxxxxxUUuu@i13:1,*,,mm,0
 1,01030CxxxxxxxxxxxxxxxxxxxxUUuu@i13:1,*,,ss,0
 1,01030CUUuuUUuuUUuuUUuuUUuuUUuu@i13:1,*,,timestamp,0
-%r%UUuuUUuu@i14:10,*,kW,energy_reverse,3
+%r%UUuuUUuu@i14:10,*,kW,energy_forward,3
 #
 
 ; html header
