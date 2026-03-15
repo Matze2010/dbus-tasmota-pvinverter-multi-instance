@@ -27,6 +27,7 @@
 seconds=15
 str=""
 hdr=""
+cstr=""
 r="1,010404"
 hs4="{m}<span style='color:yellow;'>"
 hs5="</span>"
@@ -43,6 +44,10 @@ phase_l3=0
 
 display=0
 M:res=0 3
+
+gl=0
+gl_a=0
+tmp=0
 
 >B
 =>sensor53 r
@@ -90,6 +95,19 @@ if sml[25]>0 {
 totals=sml[25]
 }
 
+if chg[gl]>0 {
+    tmp=int(gl*0.00666666)
+    if tmp==99 {
+         tmp=100 
+    }
+    cstr="r0106000300"+hn(tmp)
+    =>print Change limit to %tmp%
+    =>print %cstr%
+    sml(1 3 cstr)
+} 
+
+gl_a=sml[30]*150
+
 >F
 summe=sml[9]+sml[10]+sml[11]
 if summe>0 {
@@ -116,7 +134,7 @@ res[3]=sml[11]
 ,"PV1a":{"status":%0sml[8]%,"todayWatt":%1sml[3]%,"mainWatt":%0sml[1]%,"L1_w":%0phase_l1%,"L2_w":%0phase_l2%,"L3_w":%0phase_l3%,"L1_v":%1sml[12]%,"L2_v":%1sml[13]%,"L3_v":%1sml[14]%,"L1_c":%1sml[15]%,"L2_c":%1sml[16]%,"L3_c":%1sml[17]%,"totalEnergie":%1totals%}
 
 >M 1
-+1,17,m,0,9600,pv,5,1,01040023,01040005,01040009,01040035,0104005D,0104005F,01040000,01040028,0104002C,01040030,01040026,0104002A,0104002E,r0103002D0006,01040037,01040003,01040007
++1,17,m,0,9600,pv,5,1,01040023,01040005,01040009,01040035,0104005D,0104005F,01040000,01040028,0104002C,01040030,01040026,0104002A,0104002E,r0103002D0006,01040037,01040003,01040007,01030003
 %r%U32@i0:10,*,W,power,1
 %r%U32@i1:10,*,W,s1power,1
 %r%U32@i2:10,*,W,s2power,1
@@ -146,6 +164,7 @@ res[3]=sml[11]
 %r%UUuu@i16:10,*,V,s2voltage,1
 %r%xxxxUUuu@i15:10,*,A,s1current,1
 %r%xxxxUUuu@i16:10,*,A,s2current,1
+1,010304UUuu@i17:1,*,%,limit,0
 #
 
 ; html header
@@ -159,19 +178,23 @@ if wm==0 {
 }
 
 >W
+<br/>
 Status %invstatus1%
 <br/>
 Power (aktuell)   %hs4% %1sml[1]% W %hs5%
 Power (heute) %hs4% %1sml[4]% kW %hs5%
 Power (total) %hs4% %1totals% kW %hs5%
 <br/>
-String 1 (784 V) %hs4% %1sml[2]% W / %1sml[26]% V / %1sml[28]% A%hs5%
-String 2 (646 V) %hs4% %1sml[3]% W / %1sml[27]% V / %1sml[29]% A%hs5%
+String 1 %hs4% %1sml[2]% W / %1sml[26]% V / %1sml[28]% A%hs5%
+String 2 %hs4% %1sml[3]% W / %1sml[27]% V / %1sml[29]% A%hs5%
 <br/>
 Phase L1 %hs4% %0res[1]% W / %1sml[12]% V / %1sml[15]% A%hs5%
 Phase L2 %hs4% %0res[2]% W / %1sml[13]% V / %1sml[16]% A%hs5%
 Phase L3 %hs4% %0res[3]% W / %1sml[14]% V / %1sml[17]% A%hs5%
 <br/>
 Temp %hs4% %1sml[5]% C / %1sml[6]% C / %1sml[7]% C%hs5%
+<br/>
+Limit %hs4% %0gl_a% kW (%0sml[30]% %%) %hs5%
 
 bu(display "Phasenwerte - tech" "Phasenwerte - real")
+sl(1000 15000 gl "1K" "Export limit (W) " "15K") 
